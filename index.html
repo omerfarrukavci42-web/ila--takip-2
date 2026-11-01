@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="İlaç Takip">
+<meta name="theme-color" content="#2f7d6d">
+<title>İlaç Takip</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--tx:#1f2328;--mut:#6b7280;--ac:#2f7d6d;--acbg:#dff1ec;--warn:#b45309;--warnbg:#fdecc8;--bad:#b42318;--badbg:#fde2df;--line:#e4e2dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181a;--card:#1f2326;--tx:#ececec;--mut:#9aa3ab;--ac:#5cc2ad;--acbg:#1d3a34;--warn:#f0b35a;--warnbg:#3a2e17;--bad:#f28b82;--badbg:#3d1f1c;--line:#32373b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15181a;--card:#1f2326;--tx:#ececec;--mut:#9aa3ab;--ac:#5cc2ad;--acbg:#1d3a34;--warn:#f0b35a;--warnbg:#3a2e17;--bad:#f28b82;--badbg:#3d1f1c;--line:#32373b;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:20px;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.big{font-size:22px;font-weight:700;margin:0 0 4px}
+.mut{color:var(--mut);font-size:14px}
+button{font:inherit;border:0;border-radius:14px;padding:16px;width:100%;font-weight:700;cursor:pointer;background:var(--ac);color:#fff;margin-top:12px}
+button.sec{background:var(--acbg);color:var(--ac)}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+input{font:inherit;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--tx)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.info div{background:var(--bg);border-radius:10px;padding:10px;font-size:14px}
+.info b{display:block;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.d{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--line);background:var(--bg)}
+.d.med{cursor:pointer}
+.d.taken{background:var(--acbg);color:var(--ac);font-weight:700;border-color:var(--ac)}
+.d.miss{background:var(--badbg);color:var(--bad);border-color:var(--bad)}
+.d.brk{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.d.today{outline:2px solid var(--tx);outline-offset:1px}
+.leg{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--mut);margin-top:10px}
+.stat{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.s-ok{background:var(--acbg);color:var(--ac)}.s-wait{background:var(--badbg);color:var(--bad)}.s-brk{background:var(--warnbg);color:var(--warn)}
+.bell{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px;color:var(--mut)}
+/* alarm */
+#alarm{position:fixed;inset:0;z-index:99;background:var(--bg);display:none;flex-direction:column;justify-content:center;padding:24px;padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+#alarm.on{display:flex}
+#alarm .ic{font-size:72px;text-align:center;animation:p 1s infinite}
+#alarm h2{text-align:center;font-size:28px;margin:8px 0 4px}
+#alarm p{text-align:center;color:var(--mut);margin:0 0 20px}
+#alarm button{font-size:20px;padding:22px;margin-top:12px}
+#alarm .b-brk{background:var(--warnbg);color:var(--warn)}
+#alarm .b-snz{background:var(--badbg);color:var(--bad)}
+@keyframes p{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+:root{--yl:#7a5d00;--ylbg:#fde68a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--yl:#f5d76e;--ylbg:#3d3512}}
+:root[data-theme="dark"]{--yl:#f5d76e;--ylbg:#3d3512}
+.d.brk,.s-brk,#alarm .b-brk{background:var(--ylbg);color:var(--yl)}
+.d.med:not(.taken):not(.miss){background:var(--card)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px;text-align:center;font-size:12px;color:var(--mut)}
+.cal-h{display:flex;align-items:center;justify-content:space-between}
+.cal-h button{width:46px;margin:0;padding:8px}
+.cal-h b{text-transform:capitalize}
+.glink{display:block;margin-top:8px;padding:12px;border-radius:12px;background:var(--acbg);color:var(--ac);text-decoration:none;font-weight:600;font-size:14px}
+#alarm{background:linear-gradient(165deg,#0f3d3a 0%,#2f7d6d 60%,#4fb39c 100%);color:#fff;align-items:center;text-align:center}
+#alarm.rest{background:linear-gradient(165deg,#1e1b4b 0%,#3730a3 60%,#6366f1 100%)}
+#alarm .clk{font-size:64px;font-weight:300;letter-spacing:2px;font-variant-numeric:tabular-nums;margin:0 0 18px}
+#alarm .pulse{position:relative;width:132px;height:132px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:56px}
+#alarm .pulse::before,#alarm .pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.18);animation:ring 2s infinite}
+#alarm .pulse::after{animation-delay:1s}
+#alarm .pulse span{position:relative;z-index:1;width:104px;height:104px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center}
+@keyframes ring{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+#alarm h2{font-size:30px;margin:6px 0 4px;color:#fff}
+#alarm p{color:rgba(255,255,255,.8);margin:0 0 26px;font-size:17px}
+#alarm .btns{width:100%;max-width:420px}
+#alarm .btn{font-size:19px;padding:20px;border-radius:18px;margin-top:12px}
+#alarm .btn.p{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35)}
+#alarm .btn.s{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35)}
+#alarm .btn.g{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35)}
+#alarm.rest .btn.p{color:#fff}
+main{padding-bottom:96px!important}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{margin:0;border-radius:0;background:transparent;color:var(--mut);padding:14px 8px;font-size:15px}
+nav button.on{color:var(--ac)}
+</style>
+</head>
+<body>
+<main>
+<h1>💊 İlaç Takip</h1>
+<section id="p1"><div class="bell" id="bell"></div>
+<div class="card" id="today"></div>
+
+<div class="card">
+  <div class="cal-h"><button class="sec" id="prev" aria-label="Önceki ay">‹</button><b id="mname"></b><button class="sec" id="next" aria-label="Sonraki ay">›</button></div>
+  <div class="wk"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div>
+  <div class="grid" id="grid"></div>
+  <div class="mut" id="msum" style="margin-top:10px"></div>
+  <div class="leg"><span>🟢 İçildi</span><span>🔴 İçilmedi</span><span>🟡 Ara dönem</span><span>Geçmiş günlere dokunarak işaretle</span></div>
+</div>
+
+</section><section id="p2" hidden><div class="card">
+  <b>Ayarlar</b>
+  <label for="start">İlaca başlama tarihi</label>
+  <input type="date" id="start">
+  <div class="row">
+    <div><label for="use">Kaç gün içilecek</label><input type="number" inputmode="numeric" id="use" min="1" max="120"></div>
+    <div><label for="brk">Kaç gün ara</label><input type="number" inputmode="numeric" id="brk" min="0" max="60"></div>
+  </div>
+  <label for="time">Alarm saati (her gün)</label>
+  <input type="time" id="time">
+  <button id="save">Kaydet</button>
+  <button class="sec" id="test">Alarmı dene</button>
+  <p class="mut">Gün sayılarını doktorun ya da prospektüsteki düzene göre gir.</p>
+</div>
+
+<div class="card" id="nat" hidden>
+  <b>Telefon alarmı ve takvim</b>
+  <p class="mut">Alarm telefonun kendi sistemine kurulur, telefon kilitliyken de çalar. Önce izinleri ver.</p>
+  <button id="natset">İzinleri ver ve alarmı kur</button>
+  <button class="sec" id="natcal">Takvime hatırlatıcıları ekle</button>
+  <button class="sec" id="nattest">Deneme alarmı (5 sn sonra)</button>
+  <p class="mut" id="natmsg"></p>
+</div>
+<div class="card" id="webonly">
+  <b>Telefon kilitliyken alarm</b>
+  <p class="mut">Bir web sayfası kilitli telefonda kendi başına ses çıkaramaz. Kilitliyken çalması için alarmı telefonun kendisine kurmak gerekir. Aşağıdaki bağlantılar her döngü için günlük tekrarlı bir Takvim etkinliği oluşturur (ara günleri otomatik boş kalır). Etkinlikte hatırlatmayı <b>etkinlik anında</b> yap. Bağlantı açılmazsa telefonun saat uygulamasından her gün için alarm kur, ara günlerinde kapat.</p>
+  <div id="gcal"></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+  <b>Telefonda uygulama gibi kullan</b>
+  <p class="mut">Bağlantıyı tarayıcıda açıp <b>Ana ekrana ekle</b> de (iPhone: Paylaş ▸ Ana Ekrana Ekle, Android: ⋮ ▸ Ana ekrana ekle). Alarmın çalması için uygulama açık olmalı; telefonu kilitlemeden, ekran açık şekilde şarjda bırakmak en sağlıklısı. Kapalıyken ya da kilitliyken çalışmaz, o yüzden telefonun kendi alarmını da yedek olarak kur.</p>
+</div>
+</section></main>
+<nav><button id="t1" class="on">📅 Takvim</button><button id="t2">⚙️ Ayarlar</button></nav>
+
+<div id="alarm" role="alertdialog" aria-live="assertive"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
